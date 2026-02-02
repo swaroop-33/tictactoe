@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tic-Tac-Toe – 1% Elite Edition</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+/* ---------- animated luxury background ---------- */
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#05060f;
+    overflow:hidden;
+    color:white;
+}
+
+.bg-orb{
+    position:absolute;
+    width:380px;
+    height:380px;
+    border-radius:50%;
+    filter:blur(120px);
+    opacity:.35;
+    animation:float 12s infinite alternate ease-in-out;
+}
+
+.orb1{background:#facc15; top:-80px; left:-80px;}
+.orb2{background:#38bdf8; bottom:-100px; right:-80px; animation-delay:2s;}
+.orb3{background:#a855f7; top:60%; left:-120px; animation-delay:4s;}
+
+@keyframes float{
+    from{transform:translateY(0px) translateX(0px);}
+    to{transform:translateY(-60px) translateX(60px);}
+}
+
+/* ---------- main elite card ---------- */
+
+.game-card{
+    position:relative;
+    z-index:2;
+    width:360px;
+    padding:28px 28px 30px;
+    border-radius:22px;
+    background:linear-gradient(180deg,
+        rgba(255,255,255,.12),
+        rgba(255,255,255,.02));
+    backdrop-filter:blur(18px);
+    border:1px solid rgba(255,215,100,.25);
+    box-shadow:
+        0 30px 60px rgba(0,0,0,.7),
+        inset 0 0 40px rgba(255,215,120,.08);
+    text-align:center;
+}
+
+/* ---------- elite badge ---------- */
+
+.badge{
+    position:absolute;
+    top:-12px;
+    right:-12px;
+    background:linear-gradient(135deg,#facc15,#fde047);
+    color:#3a2a00;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    box-shadow:0 8px 20px rgba(250,204,21,.6);
+}
+
+/* ---------- titles ---------- */
+
+h1{
+    font-weight:700;
+    letter-spacing:1px;
+    font-size:26px;
+    background:linear-gradient(135deg,#fde68a,#facc15,#fff1a8);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.subtitle{
+    margin-top:4px;
+    font-size:13px;
+    color:#dbeafe;
+    opacity:.85;
+}
+
+.status{
+    margin:14px 0 8px;
+    font-weight:600;
+    color:#7dd3fc;
+    min-height:24px;
+}
+
+/* ---------- board ---------- */
+
+.board{
+    margin:18px 0 20px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:12px;
+}
+
+.cell{
+    height:92px;
+    border-radius:18px;
+    border:none;
+    cursor:pointer;
+    font-size:38px;
+    font-weight:700;
+    color:white;
+    background:
+        linear-gradient(180deg,
+        rgba(255,255,255,.18),
+        rgba(255,255,255,.05));
+    box-shadow:
+        inset 0 0 0 rgba(255,255,255,.2),
+        0 10px 20px rgba(0,0,0,.5);
+    transition:.18s ease;
+}
+
+.cell:hover{
+    transform:translateY(-6px) scale(1.03);
+    box-shadow:
+        0 18px 35px rgba(0,0,0,.8),
+        0 0 18px rgba(250,204,21,.35);
+}
+
+.cell:active{
+    transform:scale(.95);
+}
+
+/* X and O glow */
+
+.cell.x{
+    color:#22c55e;
+    text-shadow:
+        0 0 10px rgba(34,197,94,.8),
+        0 0 25px rgba(34,197,94,.6);
+}
+
+.cell.o{
+    color:#f59e0b;
+    text-shadow:
+        0 0 10px rgba(245,158,11,.9),
+        0 0 28px rgba(245,158,11,.7);
+}
+
+/* ---------- restart button ---------- */
+
+.restart{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:14px;
+    font-weight:700;
+    font-size:15px;
+    cursor:pointer;
+    color:#3a2a00;
+    background:linear-gradient(135deg,#fde047,#facc15,#f59e0b);
+    box-shadow:
+        0 10px 30px rgba(250,204,21,.55);
+    transition:.2s;
+}
+
+.restart:hover{
+    transform:translateY(-2px);
+    box-shadow:0 14px 40px rgba(250,204,21,.8);
+}
+
+/* ---------- full screen result blast ---------- */
+
+.result-overlay{
+    position:fixed;
+    inset:0;
+    z-index:50;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:
+        radial-gradient(circle at center,
+        rgba(250,204,21,.35),
+        rgba(8,10,25,.96));
+    opacity:0;
+    pointer-events:none;
+    transition:.3s;
+}
+
+.result-overlay.show{
+    opacity:1;
+    pointer-events:auto;
+}
+
+.result-text{
+    font-size:64px;
+    font-weight:800;
+    text-align:center;
+    letter-spacing:2px;
+    color:white;
+    transform:scale(.15);
+    opacity:0;
+    animation:blast .9s cubic-bezier(.2,.9,.25,1) forwards;
+    text-shadow:
+        0 0 25px rgba(250,204,21,.9),
+        0 0 60px rgba(250,204,21,.6);
+}
+
+@keyframes blast{
+    0%{transform:scale(.15);opacity:0;}
+    60%{transform:scale(1.35);opacity:1;}
+    100%{transform:scale(1);opacity:1;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+<div class="bg-orb orb3"></div>
+
+<div class="game-card">
+    <div class="badge">👑 1% ELITE</div>
+
+    <h1>Tic Tac Toe</h1>
+    <div class="subtitle">You are X · Bot is O</div>
+
+    <div id="status" class="status">Your turn</div>
+
+    <div id="board" class="board"></div>
+
+    <button class="restart" onclick="resetGame()">Restart</button>
+</div>
+
+<div id="resultOverlay" class="result-overlay">
+    <div id="resultText" class="result-text"></div>
+</div>
+
+<script>
+let board=[" "," "," "," "," "," "," "," "," "];
+let gameOver=false;
+
+const boardDiv=document.getElementById("board");
+const statusText=document.getElementById("status");
+
+function createBoard(){
+    boardDiv.innerHTML="";
+    for(let i=0;i<9;i++){
+        const b=document.createElement("button");
+        b.className="cell";
+        if(board[i]==="X") b.classList.add("x");
+        if(board[i]==="O") b.classList.add("o");
+        b.textContent=board[i];
+        b.onclick=()=>playerMove(i);
+        boardDiv.appendChild(b);
+    }
+}
+
+function checkWin(m){
+    const w=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    return w.some(a=>board[a[0]]===m&&board[a[1]]===m&&board[a[2]]===m);
+}
+
+function checkDraw(){
+    return !board.includes(" ");
+}
+
+function playerMove(i){
+    if(gameOver||board[i]!==" ") return;
+    board[i]="X";
+    createBoard();
+
+    if(checkWin("X")){
+        statusText.textContent="You Win";
+        gameOver=true;
+        showResult("👑 YOU WIN");
+        return;
+    }
+
+    if(checkDraw()){
+        statusText.textContent="Draw";
+        gameOver=true;
+        showResult("DRAW");
+        return;
+    }
+
+    statusText.textContent="Elite bot thinking…";
+    setTimeout(botMove,450);
+}
+
+function botMove(){
+
+    for(let i=0;i<9;i++){
+        if(board[i]===" "){
+            board[i]="O";
+            if(checkWin("O")){finishBot();return;}
+            board[i]=" ";
+        }
+    }
+
+    for(let i=0;i<9;i++){
+        if(board[i]===" "){
+            board[i]="X";
+            if(checkWin("X")){board[i]="O";finishBot();return;}
+            board[i]=" ";
+        }
+    }
+
+    const free=[];
+    for(let i=0;i<9;i++) if(board[i]===" ") free.push(i);
+
+    if(!free.length) return;
+
+    board[free[Math.floor(Math.random()*free.length)]]="O";
+    finishBot();
+}
+
+function finishBot(){
+    createBoard();
+
+    if(checkWin("O")){
+        statusText.textContent="Bot wins";
+        gameOver=true;
+        showResult("🤖 BOT WINS");
+        return;
+    }
+
+    if(checkDraw()){
+        statusText.textContent="Draw";
+        gameOver=true;
+        showResult("DRAW");
+        return;
+    }
+
+    statusText.textContent="Your turn";
+}
+
+function showResult(msg){
+    const o=document.getElementById("resultOverlay");
+    const t=document.getElementById("resultText");
+    t.textContent=msg;
+    o.classList.remove("show");
+    void o.offsetWidth;
+    o.classList.add("show");
+}
+
+function resetGame(){
+    board=[" "," "," "," "," "," "," "," "," "];
+    gameOver=false;
+    statusText.textContent="Your turn";
+    document.getElementById("resultOverlay").classList.remove("show");
+    createBoard();
+}
+
+createBoard();
+</script>
+
+</body>
+</html>
