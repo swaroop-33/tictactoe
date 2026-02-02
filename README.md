@@ -61,7 +61,6 @@ README.md    → Project documentation
 **Swaroop**
 
 3rd Year B.Tech – Data Science
-Internships: InternPe, CodTech
 
 ---
 
